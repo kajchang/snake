@@ -12,6 +12,14 @@ function setup() {
     started = false;
 
     frameRate(15);
+
+    document.onkeypress = ev => {
+        if (ev.charCode === 32) {
+            started = true;
+            document.querySelector('canvas').requestFullscreen();
+            document.onkeypress = () => {};
+        }
+    }
 }
 
 function draw() {
@@ -52,10 +60,12 @@ function draw() {
         textAlign(CENTER);
         text('Press Space to Start', width / 2, height / 2);
         pop();
-
-        if (keyIsDown(32)) {
-            started = true;
-        }
-
     }
+}
+
+function windowResized() {
+    resizeCanvas(
+        floor(windowWidth / Snake.size) * Snake.size,
+        floor(windowHeight / Snake.size) * Snake.size
+    );
 }
