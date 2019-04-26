@@ -1,58 +1,71 @@
-let snake, apple, started;
+let snake, apples, started;
 
 function setup() {
-    createCanvas(
-        floor(windowWidth / Snake.size) * Snake.size,
-        floor(windowHeight / Snake.size) * Snake.size
-    );
+    createCanvas(windowWidth, windowHeight);
 
     snake = new Snake();
-    apple = new Apple();
+
+    apples = [];
+
+    for (let i = 0; i < 100; i++) {
+        apples.push(new Apple(Snake.size.copy()));
+    }
 
     started = false;
-
-    frameRate(15);
 
     document.onkeypress = ev => {
         if (ev.charCode === 32) {
             started = true;
-            document.querySelector('canvas').requestFullscreen();
-            document.onkeypress = () => {};
+            //document.querySelector('canvas').requestFullscreen();
+            //document.onkeypress = () => {};
         }
-    }
+    };
 }
 
 function draw() {
     background(0);
 
     if (started) {
-        if (keyIsDown(LEFT_ARROW)) {
-            snake.direction = DIRECTIONS.LEFT;
-        } else if (keyIsDown(RIGHT_ARROW)) {
-            snake.direction = DIRECTIONS.RIGHT;
-        } else if (keyIsDown(UP_ARROW)) {
-            snake.direction = DIRECTIONS.UP;
-        } else if (keyIsDown(DOWN_ARROW)) {
-            snake.direction = DIRECTIONS.DOWN;
+        const [xTrans, yTrans] = center();
+
+        snake.update();
+
+        for (let i = 0; i < apples.length; i++) {
+            const apple = apples[i];
+
+            if (collision(snake.segments[0], apple)) {
+                snake.addSegment();
+                apples[i] = new Apple(Snake.size.copy());
+            }
         }
 
-        apple.draw();
-
-        if (snake.segments[0].position.dist(apple.position) === 0) {
-            snake.addSegment();
-            apple = new Apple();
-        }
-
-        if (
-            snake.segments.slice(1).some(segment => snake.segments[0].position.dist(segment.position) === 0) ||
-            snake.segments[0].position.x >= width || snake.segments[0].position.x <= 0 ||
-            snake.segments[0].position.y >= height || snake.segments[0].position.y <= 0
-        ) {
+        if (snake.segments.slice(1).some(segment => snake.segments[0].position.dist(segment.position) === 0)) {
             setup();
         }
 
-        snake.update();
+        if (snake.segments[0].position.x >= width * xf - snake.segments[0].size.x / 2) {
+            snake.segments[0].position.x = width * xf - snake.segments[0].size.x / 2;
+        } else if (snake.segments[0].position.x <= snake.segments[0].size.x / 2) {
+            snake.segments[0].position.x = snake.segments[0].size.x / 2;
+        }
+
+        if (snake.segments[0].position.y >= height * yf - snake.segments[0].size.y / 2) {
+            snake.segments[0].position.y = height * yf - snake.segments[0].size.y / 2;
+        } else if (snake.segments[0].position.y <= snake.segments[0].size.y / 2) {
+            snake.segments[0].position.y = snake.segments[0].size.y / 2;
+        }
+
+        push();
+
+        translate(xTrans, yTrans);
+
+        for (const apple of apples) {
+            apple.draw();
+        }
+
         snake.draw();
+
+        pop();
     } else {
         push();
         textSize(100);
@@ -64,8 +77,29 @@ function draw() {
 }
 
 function windowResized() {
-    resizeCanvas(
-        floor(windowWidth / Snake.size) * Snake.size,
-        floor(windowHeight / Snake.size) * Snake.size
-    );
+    resizeCanvas(windowWidth, windowHeight);
 }
+
+const center = () => {
+    let xTrans, yTrans;
+
+    const cameraFocus = snake.segments[0];
+
+    if (cameraFocus.position.x > width * xf - width / 2) {
+        xTrans = -width * (xf - 1);
+    } else if (cameraFocus.position.x < width / 2) {
+        xTrans = 0;
+    } else {
+        xTrans = -cameraFocus.position.x + width / 2;
+    }
+
+    if (cameraFocus.position.y > height * yf - height / 2) {
+        yTrans = -height * (yf - 1);
+    } else if (cameraFocus.position.y < height / 2) {
+        yTrans = 0;
+    } else {
+        yTrans = -cameraFocus.position.y + height / 2;
+    }
+
+    return [xTrans, yTrans];
+};

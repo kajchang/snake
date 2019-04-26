@@ -1,15 +1,14 @@
-class Apple {
-    constructor() {
-        this.position = new p5.Vector(
-            floor(random(width) / Snake.size) * Snake.size,
-            floor(random(height) / Snake.size) * Snake.size
-        );
+class Apple extends Thing {
+    constructor(size) {
+        super(new p5.Vector(random(width * xf - size.x), random(height * yf - size.y)),
+              size);
     }
 
     draw() {
         push();
         fill('red');
-        rect(this.position.x, this.position.y, Snake.size, Snake.size);
+        noStroke();
+        ellipse(this.position.x, this.position.y, this.size.x, this.size.y);
         pop();
     }
 }

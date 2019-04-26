@@ -1,17 +1,11 @@
-const DIRECTIONS = {
-    LEFT: 'LEFT',
-    RIGHT: 'RIGHT',
-    UP: 'UP',
-    DOWN: 'DOWN'
-};
-
 class Snake {
     constructor() {
-        this.segments = [new Head(new p5.Vector(
-            floor(width / 2 / Snake.size) * Snake.size,
-            floor(height / 2 / Snake.size) * Snake.size
-        ), null)];
-        this.direction = DIRECTIONS.RIGHT;
+        this.segments = [new Head(
+            new p5.Vector(width * xf / 2, height * yf / 2),
+            Snake.size.copy(),
+            Snake.maxVelocity,
+            new p5.Vector(Snake.maxVelocity, 0)
+        )];
     }
 
     addSegment() {
@@ -19,31 +13,20 @@ class Snake {
 
         this.segments.push(
             new Segment(
-                new p5.Vector(lastSegment.position.x, lastSegment.position.y).sub(Snake.getDirectionVector(this.direction, Snake.size)),
+                new p5.Vector(lastSegment.position.x, lastSegment.position.y)
+                    .sub(lastSegment.velocity.normalize().mult(Snake.size.x)),
+                Snake.size.copy(),
+                Snake.maxVelocity,
+                lastSegment.velocity,
                 lastSegment
             )
         );
     }
 
-    static getDirectionVector(direction, size) {
-        switch (direction) {
-            case DIRECTIONS.RIGHT:
-                return new p5.Vector(size, 0);
-            case DIRECTIONS.LEFT:
-                return new p5.Vector(-size, 0);
-            case DIRECTIONS.UP:
-                return new p5.Vector(0, -size);
-            case DIRECTIONS.DOWN:
-                return new p5.Vector(0, size);
-        }
-    }
-
     update() {
-        for (const segment of this.segments.slice(1).reverse()) {
+        for (const segment of this.segments) {
             segment.update();
         }
-
-        this.segments[0].update(this.direction);
     }
 
     draw() {
@@ -53,4 +36,5 @@ class Snake {
     }
 }
 
-Snake.size = 25;
+Snake.size = new p5.Vector(25, 25);
+Snake.maxVelocity = 5;
