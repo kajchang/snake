@@ -1,10 +1,10 @@
 class Snake {
-    constructor() {
+    constructor(headTarget, headPosition) {
         this.segments = [new Head(
-            new p5.Vector(width * xf / 2, height * yf / 2),
+            headPosition,
             Snake.size.copy(),
             Snake.maxVelocity,
-            new p5.Vector(Snake.maxVelocity, 0)
+            headTarget
         )];
     }
 
@@ -23,9 +23,18 @@ class Snake {
         );
     }
 
-    update() {
+    update(state) {
         for (const segment of this.segments) {
             segment.update();
+        }
+
+        for (let i = 0; i < state.apples.length; i++) {
+            const apple = state.apples[i];
+
+            if (collision(this.segments[0], apple)) {
+                this.addSegment();
+                state.apples.splice(i, 1);
+            }
         }
     }
 

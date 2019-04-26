@@ -24,6 +24,8 @@ class Segment extends Thing {
         const targetPosition = target.position.copy().add(buffer);
 
         const targetVelocity = targetPosition.sub(this.position).normalize().mult(this.maxVelocity);
+
+
         const steering = targetVelocity.sub(this.velocity);
 
         steering.truncate(maxForce);

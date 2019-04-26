@@ -1,7 +1,17 @@
 class Apple extends Thing {
-    constructor(size) {
-        super(new p5.Vector(random(width * xf - size.x), random(height * yf - size.y)),
-              size);
+    constructor(size, position) {
+        super(position, size);
+    }
+
+    update(state) {
+        if (random(10) < 0.005) {
+            if (state.apples.length < 250) {
+                state.apples.push(new Apple(Apple.size.copy(), new p5.Vector(
+                    random(this.position.x - 100, this.position.x + 100),
+                    random(this.position.y - 100, this.position.y + 100)
+                )));
+            }
+        }
     }
 
     draw() {
@@ -12,3 +22,5 @@ class Apple extends Thing {
         pop();
     }
 }
+
+Apple.size = new p5.Vector(25, 25);

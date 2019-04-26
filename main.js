@@ -1,14 +1,24 @@
-let snake, apples, started;
+const state = {
+};
+
+let started;
 
 function setup() {
     createCanvas(windowWidth, windowHeight);
 
-    snake = new Snake();
+    state.snake = new PlayerSnake();
 
-    apples = [];
+    state.computerSnakes = [];
+
+    for (let i = 0; i < 5; i++) {
+        state.computerSnakes.push(new ComputerSnake());
+    }
+
+    state.apples = [];
 
     for (let i = 0; i < 100; i++) {
-        apples.push(new Apple(Snake.size.copy()));
+        state.apples.push(new Apple(Apple.size.copy(),
+                          new p5.Vector(random(width * xf - Apple.size.x), random(height * yf - Apple.size.y))));
     }
 
     started = false;
@@ -28,42 +38,41 @@ function draw() {
     if (started) {
         const [xTrans, yTrans] = center();
 
-        snake.update();
-
-        for (let i = 0; i < apples.length; i++) {
-            const apple = apples[i];
-
-            if (collision(snake.segments[0], apple)) {
-                snake.addSegment();
-                apples[i] = new Apple(Snake.size.copy());
-            }
+        for (const apple of state.apples) {
+            apple.update(state);
         }
 
-        if (snake.segments.slice(1).some(segment => snake.segments[0].position.dist(segment.position) === 0)) {
-            setup();
+        for (const computerSnake of state.computerSnakes) {
+            computerSnake.update(state);
         }
 
-        if (snake.segments[0].position.x >= width * xf - snake.segments[0].size.x / 2) {
-            snake.segments[0].position.x = width * xf - snake.segments[0].size.x / 2;
-        } else if (snake.segments[0].position.x <= snake.segments[0].size.x / 2) {
-            snake.segments[0].position.x = snake.segments[0].size.x / 2;
+        state.snake.update(state);
+
+        if (state.snake.segments[0].position.x >= width * xf - state.snake.segments[0].size.x / 2) {
+            state.snake.segments[0].position.x = width * xf - state.snake.segments[0].size.x / 2;
+        } else if (state.snake.segments[0].position.x <= state.snake.segments[0].size.x / 2) {
+            state.snake.segments[0].position.x = state.snake.segments[0].size.x / 2;
         }
 
-        if (snake.segments[0].position.y >= height * yf - snake.segments[0].size.y / 2) {
-            snake.segments[0].position.y = height * yf - snake.segments[0].size.y / 2;
-        } else if (snake.segments[0].position.y <= snake.segments[0].size.y / 2) {
-            snake.segments[0].position.y = snake.segments[0].size.y / 2;
+        if (state.snake.segments[0].position.y >= height * yf - state.snake.segments[0].size.y / 2) {
+            state.snake.segments[0].position.y = height * yf - state.snake.segments[0].size.y / 2;
+        } else if (state.snake.segments[0].position.y <= state.snake.segments[0].size.y / 2) {
+            state.snake.segments[0].position.y = state.snake.segments[0].size.y / 2;
         }
 
         push();
 
         translate(xTrans, yTrans);
 
-        for (const apple of apples) {
+        for (const apple of state.apples) {
             apple.draw();
         }
 
-        snake.draw();
+        for (const computerSnake of state.computerSnakes) {
+            computerSnake.draw();
+        }
+
+        state.snake.draw();
 
         pop();
     } else {
@@ -83,7 +92,7 @@ function windowResized() {
 const center = () => {
     let xTrans, yTrans;
 
-    const cameraFocus = snake.segments[0];
+    const cameraFocus = state.snake.segments[0];
 
     if (cameraFocus.position.x > width * xf - width / 2) {
         xTrans = -width * (xf - 1);
